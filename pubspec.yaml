@@ -1,4 +1,4 @@
-name: shared_preferences
+name: shared_preferences_dio
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -34,7 +34,13 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.6
+  cupertino_icons: ^1.0.8
+  cloud_firestore: ^5.6.6
+  firebase_auth: ^5.5.2
+  riverpod: ^2.6.1
+  table_calendar: ^3.2.0
+  shared_preferences: ^2.5.3
+
 
 dev_dependencies:
   flutter_test:

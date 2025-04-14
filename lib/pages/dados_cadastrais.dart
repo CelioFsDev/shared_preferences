@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/repositories/linguagens_repository.dart';
-import 'package:shared_preferences/repositories/nivel_repository.dart';
-import 'package:shared_preferences/shared/widgets/text_label.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences_dio/repositories/linguagens_repository.dart';
+import 'package:shared_preferences_dio/repositories/nivel_repository.dart';
+import 'package:shared_preferences_dio/shared/widgets/text_label.dart';
 
 class TrilhaDadosCadastrais extends StatefulWidget {
-  const TrilhaDadosCadastrais({
-    super.key,
-  });
+  const TrilhaDadosCadastrais({super.key});
 
   @override
   State<TrilhaDadosCadastrais> createState() => _TrilhaDadosCadastraisState();
@@ -14,30 +13,60 @@ class TrilhaDadosCadastrais extends StatefulWidget {
 
 class _TrilhaDadosCadastraisState extends State<TrilhaDadosCadastrais> {
   TextEditingController nomeController = TextEditingController(text: '');
-  var dataNacimentoController = TextEditingController(text: '');
+  TextEditingController dataNacimentoController =
+      TextEditingController(text: '');
   DateTime? dataNacimento;
+
   var niveis = [];
   var nivelRepository = NivelRepository();
   var nivelSelecionado = '';
+
   var linguagens = [];
   var linguagensRepository = LinguagensRepository();
-  var linguagensSelecionadas = [];
+  var linguagensSelecionadas = <String>[];
+
   double salarioEscolhido = 0;
   int tempoExperiencia = 0;
   bool salvando = false;
 
+  late SharedPreferences prefs;
+
+  final String CHAVE_NOME = 'nome';
+  final String CHAVE_DATA = 'data_nascimento';
+  final String CHAVE_NIVEL = 'nivel';
+  final String CHAVE_LINGUAGENS = 'linguagens';
+  final String CHAVE_TEMPO = 'tempo';
+  final String CHAVE_SALARIO = 'salario';
+
   @override
   void initState() {
+    super.initState();
     niveis = nivelRepository.retornaNiveis();
     linguagens = linguagensRepository.retornaLinguagens();
-    super.initState();
+    carregarDados();
   }
 
-  //essa forma fica disponivel onde esta criado
+  Future<void> carregarDados() async {
+    prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      nomeController.text = prefs.getString(CHAVE_NOME) ?? '';
+      dataNacimentoController.text = prefs.getString(CHAVE_DATA) ?? '';
+      nivelSelecionado = prefs.getString(CHAVE_NIVEL) ?? '';
+      linguagensSelecionadas = prefs.getStringList(CHAVE_LINGUAGENS) ?? [];
+      tempoExperiencia = prefs.getInt(CHAVE_TEMPO) ?? 0;
+      salarioEscolhido = prefs.getDouble(CHAVE_SALARIO) ?? 0;
+    });
+
+    if (dataNacimentoController.text.isNotEmpty) {
+      dataNacimento = DateTime.tryParse(dataNacimentoController.text);
+    }
+  }
+
   Text returntext(String texto) {
     return Text(
       texto,
-      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
     );
   }
 
@@ -59,207 +88,181 @@ class _TrilhaDadosCadastraisState extends State<TrilhaDadosCadastrais> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.amber,
-        title: Text('Perfil'),
+        title: const Text('Perfil'),
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
           child: salvando
-              ? Center(child: CircularProgressIndicator())
+              ? const Center(child: CircularProgressIndicator())
               : ListView(
                   children: [
-                    //Uma forma de add um texto por função criando widgets
-                    TextLabel(
-                      texto: 'Name',
-                    ),
+                    const TextLabel(texto: 'Nome'),
+                    TextField(controller: nomeController),
+                    const TextLabel(texto: 'Data de nascimento'),
                     TextField(
-                      controller: nomeController,
-                    ),
-                    //Uma forma de add um texto por widgets
-                    TextLabel(
-                      texto: 'Data de nascimento',
-                    ),
-
-                    TextField(
-                      readOnly: true, //para não fazer a escrita
+                      readOnly: true,
                       controller: dataNacimentoController,
                       onTap: () async {
                         var data = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime(2000, 1, 1),
-                            firstDate: DateTime(1900, 1, 1),
-                            lastDate: DateTime(2023, 12, 31));
+                          context: context,
+                          initialDate: DateTime(2000, 1, 1),
+                          firstDate: DateTime(1900, 1, 1),
+                          lastDate: DateTime(2025, 12, 31),
+                        );
                         if (data != null) {
                           dataNacimentoController.text = data.toString();
                           dataNacimento = data;
                         }
                       },
                     ),
-                    TextLabel(
-                      texto: 'Nivel de experiencia ',
-                    ),
+                    const TextLabel(texto: 'Nível de experiência'),
                     Column(
-                        children: niveis
-                            .map((nivel) => RadioListTile(
-                                dense: true,
-                                title: Text(nivel.toString()),
-                                selected: nivelSelecionado == nivel,
-                                value: nivel.toString(),
-                                groupValue: nivelSelecionado,
-                                onChanged: (value) {
-                                  setState(() {
-                                    nivelSelecionado = value.toString();
-                                  });
-                                }))
-                            .toList()),
-
-                    TextLabel(
-                      texto: 'linguagens Preferidas',
+                      children: niveis.map((nivel) {
+                        return RadioListTile(
+                          dense: true,
+                          title: Text(nivel.toString()),
+                          selected: nivelSelecionado == nivel,
+                          value: nivel.toString(),
+                          groupValue: nivelSelecionado,
+                          onChanged: (value) {
+                            setState(() {
+                              nivelSelecionado = value.toString();
+                            });
+                          },
+                        );
+                      }).toList(),
                     ),
-
+                    const TextLabel(texto: 'Linguagens Preferidas'),
                     Column(
-                      children: linguagens
-                          .map((linguagem) => CheckboxListTile(
-                              dense: true,
-                              title: Text(linguagem.toString()),
-                              selected: linguagensSelecionadas == linguagem,
-                              value: linguagensSelecionadas.contains(linguagem),
-                              onChanged: (value) {
-                                if (value!) {
-                                  linguagensSelecionadas.add(linguagem);
-                                } else {
-                                  linguagensSelecionadas.remove(linguagem);
-                                }
-                                setState(() {});
-                              }))
-                          .toList(),
+                      children: linguagens.map((linguagem) {
+                        return CheckboxListTile(
+                          dense: true,
+                          title: Text(linguagem.toString()),
+                          selected: linguagensSelecionadas.contains(linguagem),
+                          value: linguagensSelecionadas.contains(linguagem),
+                          onChanged: (value) {
+                            setState(() {
+                              if (value!) {
+                                linguagensSelecionadas.add(linguagem);
+                              } else {
+                                linguagensSelecionadas.remove(linguagem);
+                              }
+                            });
+                          },
+                        );
+                      }).toList(),
                     ),
-                    TextLabel(
-                      texto: 'Tempo de Experiência',
-                    ),
+                    const TextLabel(texto: 'Tempo de Experiência'),
                     DropdownButton(
-                        value: tempoExperiencia,
-                        isExpanded: true,
-                        items: returnItens(50),
-                        onChanged: (value) {
-                          setState(() {
-                            tempoExperiencia = int.parse(value.toString());
-                          });
-                        }),
-                    TextLabel(
-                      texto:
-                          'Pretenção Salarial. R\$ ${salarioEscolhido.round()}',
-                    ),
-
-                    Slider(
-                        min: 0,
-                        max: 20000,
-                        value: salarioEscolhido,
-                        onChanged: (double value) {
-                          setState(() {
-                            salarioEscolhido = value;
-                            print(value);
-                          });
-                        }),
-
-                    TextButton(
-                      onPressed: () {
+                      value: tempoExperiencia,
+                      isExpanded: true,
+                      items: returnItens(50),
+                      onChanged: (value) {
                         setState(() {
-                          salvando = false;
+                          tempoExperiencia = int.parse(value.toString());
                         });
-
+                      },
+                    ),
+                    TextLabel(
+                        texto:
+                            'Pretensão Salarial: R\$ ${salarioEscolhido.round()}'),
+                    Slider(
+                      min: 0,
+                      max: 20000,
+                      value: salarioEscolhido,
+                      onChanged: (value) {
+                        setState(() {
+                          salarioEscolhido = value;
+                        });
+                      },
+                    ),
+                    TextButton(
+                      onPressed: () async {
                         if (nomeController.text.trim().length < 3) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Nome deve ser maior que 3 caracteres',
-                              ),
+                            const SnackBar(
+                              content:
+                                  Text('Nome deve ser maior que 3 caracteres'),
                             ),
                           );
                           return;
                         }
+
                         if (dataNacimento == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Data de nascimento invalida',
-                              ),
+                            const SnackBar(
+                              content: Text('Data de nascimento inválida'),
                             ),
                           );
                           return;
                         }
-                        if (nivelSelecionado.trim() == "") {
+
+                        if (nivelSelecionado.trim().isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'O nivel deve ser selecionado',
-                              ),
+                            const SnackBar(
+                              content: Text('O nível deve ser selecionado'),
                             ),
                           );
                           return;
                         }
+
                         if (linguagensSelecionadas.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Deve ser selecionado ao menos 1 linguagem',
-                              ),
+                            const SnackBar(
+                              content: Text('Selecione ao menos 1 linguagem'),
                             ),
                           );
                           return;
                         }
-                        if (nivelSelecionado.trim() == "") {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'O nivel deve ser selecionado',
-                              ),
-                            ),
-                          );
-                          return;
-                        }
+
                         if (tempoExperiencia == 0) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
+                            const SnackBar(
                               content: Text(
-                                'Deve ter ao menos 1 ano de experiência',
-                              ),
+                                  'Deve ter ao menos 1 ano de experiência'),
                             ),
                           );
                           return;
                         }
+
                         if (salarioEscolhido <= 1412) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
+                            const SnackBar(
                               content: Text(
-                                'Pretenção salarial deve ser mais que ZERO',
-                              ),
+                                  'Pretensão salarial deve ser maior que o salário mínimo'),
                             ),
                           );
                           return;
                         }
+
                         setState(() {
                           salvando = true;
                         });
 
-                        Future.delayed(Duration(seconds: 3), () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Pretenção salarial deve ser mais que ZERO',
-                              ),
-                            ),
-                          );
-                          //não precisa do setState
-                          setState(() {
-                            salvando = false;
-                          });
+                        await prefs.setString(CHAVE_NOME, nomeController.text);
+                        await prefs.setString(
+                            CHAVE_DATA, dataNacimento.toString());
+                        await prefs.setString(CHAVE_NIVEL, nivelSelecionado);
+                        await prefs.setStringList(
+                            CHAVE_LINGUAGENS, linguagensSelecionadas);
+                        await prefs.setInt(CHAVE_TEMPO, tempoExperiencia);
+                        await prefs.setDouble(CHAVE_SALARIO, salarioEscolhido);
+
+                        await Future.delayed(const Duration(seconds: 2));
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Dados salvos com sucesso!')),
+                        );
+
+                        setState(() {
+                          salvando = false;
                         });
+
                         Navigator.pop(context);
                       },
-                      child: Text(
-                        'Salvar',
-                      ),
+                      child: const Text('Salvar'),
                     ),
                   ],
                 ),

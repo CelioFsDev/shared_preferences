@@ -1,5 +1,5 @@
-import 'package:shared_preferences/model/card_detail.dart';
-import 'package:shared_preferences/shared/widgets/app_images.dart';
+import 'package:shared_preferences_dio/model/card_detail.dart';
+import 'package:shared_preferences_dio/shared/widgets/app_images.dart';
 
 class CardDetailRepository {
   Future<CardDetail> get() async {

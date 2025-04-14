@@ -1,4 +1,4 @@
-import 'package:shared_preferences/model/tarefa.dart';
+import 'package:shared_preferences_dio/model/tarefa.dart';
 
 class TarefaRepository {
   final List<Tarefa> _tarefas = [];

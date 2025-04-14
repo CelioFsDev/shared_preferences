@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/pages/drawer_page.dart';
-import 'package:shared_preferences/shared/widgets/app_images.dart';
+import 'package:shared_preferences_dio/pages/drawer_page.dart';
+import 'package:shared_preferences_dio/shared/widgets/app_images.dart';
 
 class TrilhaLoginPage extends StatefulWidget {
   const TrilhaLoginPage({super.key});

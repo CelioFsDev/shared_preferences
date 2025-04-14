@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/model/tarefa.dart';
-import 'package:shared_preferences/repositories/tarefa_repository.dart';
+import 'package:shared_preferences_dio/model/tarefa.dart';
+import 'package:shared_preferences_dio/repositories/tarefa_repository.dart';
 
 class TarefaPage extends StatefulWidget {
   const TarefaPage({super.key});

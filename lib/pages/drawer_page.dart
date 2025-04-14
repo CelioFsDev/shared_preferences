@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/pages/card_page.dart';
-import 'package:shared_preferences/pages/list_view_horizontal.dart';
-import 'package:shared_preferences/pages/list_view_vertical.dart';
-import 'package:shared_preferences/pages/nova_tarefa_page.dart';
-import 'package:shared_preferences/shared/widgets/custom_drawer.dart';
+import 'package:shared_preferences_dio/pages/card_page.dart';
+import 'package:shared_preferences_dio/pages/list_view_horizontal.dart';
+import 'package:shared_preferences_dio/pages/list_view_vertical.dart';
+import 'package:shared_preferences_dio/pages/nova_tarefa_page.dart';
+import 'package:shared_preferences_dio/shared/widgets/custom_drawer.dart';
 
 class TrilhaDrawerPage extends StatefulWidget {
   const TrilhaDrawerPage({super.key});

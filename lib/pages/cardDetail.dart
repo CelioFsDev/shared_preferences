@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/model/card_detail.dart';
+import 'package:shared_preferences_dio/model/card_detail.dart';
 
 class CardDetailPage extends StatelessWidget {
   final CardDetail cardDetail;

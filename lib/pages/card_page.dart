@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/model/card_detail.dart';
-import 'package:shared_preferences/pages/cardDetail.dart';
-import 'package:shared_preferences/repositories/card_detail_repository.dart';
+import 'package:shared_preferences_dio/model/card_detail.dart';
+import 'package:shared_preferences_dio/pages/cardDetail.dart';
+import 'package:shared_preferences_dio/repositories/card_detail_repository.dart';
 
 class CardPage extends StatefulWidget {
   const CardPage({super.key});

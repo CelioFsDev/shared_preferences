@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared/widgets/app_images.dart';
+import 'package:shared_preferences_dio/shared/widgets/app_images.dart';
 
 class ListViewVerticalPage extends StatefulWidget {
   const ListViewVerticalPage({super.key});

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/pages/dados_cadastrais.dart';
-import 'package:shared_preferences/pages/login_page.dart';
-import 'package:shared_preferences/shared/widgets/termos_de_uso.dart';
+import 'package:shared_preferences_dio/pages/configuracoes_page.dart';
+import 'package:shared_preferences_dio/pages/dados_cadastrais.dart';
+import 'package:shared_preferences_dio/pages/login_page.dart';
+import 'package:shared_preferences_dio/pages/numeros_aleatorios_page.dart';
+import 'package:shared_preferences_dio/shared/widgets/termos_de_uso.dart';
 
 class CustomDrawer extends StatelessWidget {
   const CustomDrawer({
@@ -81,6 +83,60 @@ class CustomDrawer extends StatelessWidget {
                   Text(
                     'Dados Cadastrais',
                     style: TextStyle(color: Colors.red),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Divider(),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NumerosAleatoriosPage(),
+                ),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  Icon(Icons.numbers),
+                  Padding(
+                    padding: EdgeInsets.all(10),
+                  ),
+                  Text(
+                    'Numeros Aleatórios',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Divider(),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ConfiguracaoPage(),
+                ),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  Icon(Icons.construction),
+                  Padding(
+                    padding: EdgeInsets.all(10),
+                  ),
+                  Text(
+                    'Configurações',
+                    style: TextStyle(color: Colors.black),
                   ),
                 ],
               ),

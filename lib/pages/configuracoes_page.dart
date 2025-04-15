@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:shared_preferences_dio/services/app_storage_service.dart';
 
 class ConfiguracaoPage extends StatefulWidget {
   const ConfiguracaoPage({super.key});
@@ -17,13 +16,7 @@ class _ConfiguracaoPageState extends State<ConfiguracaoPage> {
   bool temaEscuro = false;
   bool notificacao = false;
 
-  late SharedPreferences storage;
-
-  final CHAVE_NOME = 'nome_usuario';
-  final CHAVE_EMAIL = 'email_usuario';
-  final CHAVE_ALTURA = 'altura_usuario';
-  final CHAVE_TEMA_ESCURO = 'tema_escuro';
-  final CHAVE_NOTIFICACAO = 'notificacao';
+  final storage = AppStorageService();
 
   @override
   void initState() {
@@ -32,28 +25,36 @@ class _ConfiguracaoPageState extends State<ConfiguracaoPage> {
   }
 
   Future<void> carregarConfiguracoes() async {
-    storage = await SharedPreferences.getInstance();
-    setState(() {
-      nomeController.text = storage.getString(CHAVE_NOME) ?? '';
-      emailController.text = storage.getString(CHAVE_EMAIL) ?? '';
-      alturaController.text =
-          (storage.getDouble(CHAVE_ALTURA)?.toString() ?? '');
-      temaEscuro = storage.getBool(CHAVE_TEMA_ESCURO) ?? false;
-      notificacao = storage.getBool(CHAVE_NOTIFICACAO) ?? false;
-    });
+    nomeController.text =
+        (await storage.getValue(STORAGE_KEYS.CHAVE_DADOSCADASTRAIS_NOME)) ?? '';
+    emailController.text =
+        (await storage.getValue(STORAGE_KEYS.CHAVE_DADOSCADASTRAIS_EMAIL)) ?? '';
+
+    final altura =
+        await storage.getValue(STORAGE_KEYS.CHAVE_DADOSCADASTRAIS_ALTURA);
+    alturaController.text = altura?.toString() ?? '';
+
+    temaEscuro =
+        await storage.getValue(STORAGE_KEYS.CHAVE_TEMA_ESCURO) ?? false;
+    notificacao =
+        await storage.getValue(STORAGE_KEYS.CHAVE_NOTIFICACAO) ?? false;
+
+    setState(() {});
   }
 
   Future<void> salvarConfiguracoes() async {
-    await storage.setString(CHAVE_NOME, nomeController.text);
-    await storage.setString(CHAVE_EMAIL, emailController.text);
+    await storage.setValue(
+        STORAGE_KEYS.CHAVE_DADOSCADASTRAIS_NOME, nomeController.text);
+    await storage.setValue(
+        STORAGE_KEYS.CHAVE_DADOSCADASTRAIS_EMAIL, emailController.text);
 
     double? altura = double.tryParse(alturaController.text);
     if (altura != null) {
-      await storage.setDouble(CHAVE_ALTURA, altura);
+      await storage.setValue(STORAGE_KEYS.CHAVE_DADOSCADASTRAIS_ALTURA, altura);
     }
 
-    await storage.setBool(CHAVE_TEMA_ESCURO, temaEscuro);
-    await storage.setBool(CHAVE_NOTIFICACAO, notificacao);
+    await storage.setValue(STORAGE_KEYS.CHAVE_TEMA_ESCURO, temaEscuro);
+    await storage.setValue(STORAGE_KEYS.CHAVE_NOTIFICACAO, notificacao);
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Configurações salvas com sucesso!')),
@@ -124,7 +125,6 @@ class _ConfiguracaoPageState extends State<ConfiguracaoPage> {
               onChanged: (value) {
                 setState(() {
                   notificacao = value;
-
                 });
               },
             ),

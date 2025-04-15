@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shared_preferences_dio/repositories/linguagens_repository.dart';
 import 'package:shared_preferences_dio/repositories/nivel_repository.dart';
+import 'package:shared_preferences_dio/services/app_storage_service.dart';
 import 'package:shared_preferences_dio/shared/widgets/text_label.dart';
 
 class TrilhaDadosCadastrais extends StatefulWidget {
@@ -12,31 +12,21 @@ class TrilhaDadosCadastrais extends StatefulWidget {
 }
 
 class _TrilhaDadosCadastraisState extends State<TrilhaDadosCadastrais> {
-  TextEditingController nomeController = TextEditingController(text: '');
-  TextEditingController dataNacimentoController =
-      TextEditingController(text: '');
+  final nomeController = TextEditingController(text: '');
+  final dataNacimentoController = TextEditingController(text: '');
   DateTime? dataNacimento;
 
+  final nivelRepository = NivelRepository();
+  final linguagensRepository = LinguagensRepository();
+  final storage = AppStorageService();
+
   var niveis = [];
-  var nivelRepository = NivelRepository();
-  var nivelSelecionado = '';
-
   var linguagens = [];
-  var linguagensRepository = LinguagensRepository();
   var linguagensSelecionadas = <String>[];
-
+  var nivelSelecionado = '';
   double salarioEscolhido = 0;
   int tempoExperiencia = 0;
   bool salvando = false;
-
-  late SharedPreferences prefs;
-
-  final String CHAVE_NOME = 'nome';
-  final String CHAVE_DATA = 'data_nascimento';
-  final String CHAVE_NIVEL = 'nivel';
-  final String CHAVE_LINGUAGENS = 'linguagens';
-  final String CHAVE_TEMPO = 'tempo';
-  final String CHAVE_SALARIO = 'salario';
 
   @override
   void initState() {
@@ -47,40 +37,35 @@ class _TrilhaDadosCadastraisState extends State<TrilhaDadosCadastrais> {
   }
 
   Future<void> carregarDados() async {
-    prefs = await SharedPreferences.getInstance();
-
-    setState(() {
-      nomeController.text = prefs.getString(CHAVE_NOME) ?? '';
-      dataNacimentoController.text = prefs.getString(CHAVE_DATA) ?? '';
-      nivelSelecionado = prefs.getString(CHAVE_NIVEL) ?? '';
-      linguagensSelecionadas = prefs.getStringList(CHAVE_LINGUAGENS) ?? [];
-      tempoExperiencia = prefs.getInt(CHAVE_TEMPO) ?? 0;
-      salarioEscolhido = prefs.getDouble(CHAVE_SALARIO) ?? 0;
-    });
+    nomeController.text =
+        await storage.getValue(STORAGE_KEYS.CHAVE_DADOSCADASTRAIS_NOME) ?? '';
+    dataNacimentoController.text =
+        await storage.getValue(STORAGE_KEYS.CHAVE_DADOSCADASTRAIS_DATA) ?? '';
+    nivelSelecionado =
+        await storage.getValue(STORAGE_KEYS.CHAVE_DADOSCADASTRAIS_NIVEL) ?? '';
+    linguagensSelecionadas =
+        await storage.getValue(STORAGE_KEYS.CHAVE_DADOSCADASTRAIS_LINGUAGEM) ??
+            [];
+    tempoExperiencia =
+        await storage.getValue(STORAGE_KEYS.CHAVE_DADOSCADASTRAIS_TEMPO) ?? 0;
+    salarioEscolhido =
+        await storage.getValue(STORAGE_KEYS.CHAVE_DADOSCADASTRAIS_SALARIO) ?? 0;
 
     if (dataNacimentoController.text.isNotEmpty) {
       dataNacimento = DateTime.tryParse(dataNacimentoController.text);
     }
+
+    setState(() {});
   }
 
-  Text returntext(String texto) {
-    return Text(
-      texto,
-      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+  List<DropdownMenuItem<int>> returnItens(int quantidadeMaxima) {
+    return List.generate(
+      quantidadeMaxima + 1,
+      (index) => DropdownMenuItem<int>(
+        value: index,
+        child: Text(index.toString()),
+      ),
     );
-  }
-
-  List<DropdownMenuItem> returnItens(int quantidadeMaxima) {
-    var itens = <DropdownMenuItem>[];
-    for (var i = 0; i <= quantidadeMaxima; i++) {
-      itens.add(
-        DropdownMenuItem(
-          child: Text(i.toString()),
-          value: i,
-        ),
-      );
-    }
-    return itens;
   }
 
   @override
@@ -111,8 +96,8 @@ class _TrilhaDadosCadastraisState extends State<TrilhaDadosCadastrais> {
                           lastDate: DateTime(2025, 12, 31),
                         );
                         if (data != null) {
-                          dataNacimentoController.text = data.toString();
                           dataNacimento = data;
+                          dataNacimentoController.text = data.toIso8601String();
                         }
                       },
                     ),
@@ -154,13 +139,13 @@ class _TrilhaDadosCadastraisState extends State<TrilhaDadosCadastrais> {
                       }).toList(),
                     ),
                     const TextLabel(texto: 'Tempo de Experiência'),
-                    DropdownButton(
+                    DropdownButton<int>(
                       value: tempoExperiencia,
                       isExpanded: true,
                       items: returnItens(50),
                       onChanged: (value) {
                         setState(() {
-                          tempoExperiencia = int.parse(value.toString());
+                          tempoExperiencia = value!;
                         });
                       },
                     ),
@@ -180,87 +165,65 @@ class _TrilhaDadosCadastraisState extends State<TrilhaDadosCadastrais> {
                     TextButton(
                       onPressed: () async {
                         if (nomeController.text.trim().length < 3) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content:
-                                  Text('Nome deve ser maior que 3 caracteres'),
-                            ),
-                          );
+                          _showSnackBar('Nome deve ser maior que 3 caracteres');
                           return;
                         }
 
                         if (dataNacimento == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Data de nascimento inválida'),
-                            ),
-                          );
+                          _showSnackBar('Data de nascimento inválida');
                           return;
                         }
 
                         if (nivelSelecionado.trim().isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('O nível deve ser selecionado'),
-                            ),
-                          );
+                          _showSnackBar('O nível deve ser selecionado');
                           return;
                         }
 
                         if (linguagensSelecionadas.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Selecione ao menos 1 linguagem'),
-                            ),
-                          );
+                          _showSnackBar('Selecione ao menos 1 linguagem');
                           return;
                         }
 
                         if (tempoExperiencia == 0) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                  'Deve ter ao menos 1 ano de experiência'),
-                            ),
-                          );
+                          _showSnackBar(
+                              'Deve ter ao menos 1 ano de experiência');
                           return;
                         }
 
                         if (salarioEscolhido <= 1412) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                  'Pretensão salarial deve ser maior que o salário mínimo'),
-                            ),
-                          );
+                          _showSnackBar(
+                              'Pretensão salarial deve ser maior que o salário mínimo');
                           return;
                         }
 
-                        setState(() {
-                          salvando = true;
-                        });
+                        setState(() => salvando = true);
 
-                        await prefs.setString(CHAVE_NOME, nomeController.text);
-                        await prefs.setString(
-                            CHAVE_DATA, dataNacimento.toString());
-                        await prefs.setString(CHAVE_NIVEL, nivelSelecionado);
-                        await prefs.setStringList(
-                            CHAVE_LINGUAGENS, linguagensSelecionadas);
-                        await prefs.setInt(CHAVE_TEMPO, tempoExperiencia);
-                        await prefs.setDouble(CHAVE_SALARIO, salarioEscolhido);
+                        await storage.setValue(
+                            STORAGE_KEYS.CHAVE_DADOSCADASTRAIS_NOME,
+                            nomeController.text);
+                        await storage.setValue(
+                            STORAGE_KEYS.CHAVE_DADOSCADASTRAIS_DATA,
+                            dataNacimento.toString());
+                        await storage.setValue(
+                            STORAGE_KEYS.CHAVE_DADOSCADASTRAIS_NIVEL,
+                            nivelSelecionado);
+                        await storage.setValue(
+                            STORAGE_KEYS.CHAVE_DADOSCADASTRAIS_LINGUAGEM,
+                            linguagensSelecionadas);
+                        await storage.setValue(
+                            STORAGE_KEYS.CHAVE_DADOSCADASTRAIS_TEMPO,
+                            tempoExperiencia);
+                        await storage.setValue(
+                            STORAGE_KEYS.CHAVE_DADOSCADASTRAIS_SALARIO,
+                            salarioEscolhido);
 
-                        await Future.delayed(const Duration(seconds: 2));
+                        await Future.delayed(const Duration(seconds: 1));
 
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Dados salvos com sucesso!')),
-                        );
-
-                        setState(() {
-                          salvando = false;
-                        });
-
-                        Navigator.pop(context);
+                        if (mounted) {
+                          _showSnackBar('Dados salvos com sucesso!');
+                          setState(() => salvando = false);
+                          Navigator.pop(context);
+                        }
                       },
                       child: const Text('Salvar'),
                     ),
@@ -268,6 +231,12 @@ class _TrilhaDadosCadastraisState extends State<TrilhaDadosCadastrais> {
                 ),
         ),
       ),
+    );
+  }
+
+  void _showSnackBar(String mensagem) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(mensagem)),
     );
   }
 }

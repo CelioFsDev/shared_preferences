@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences_dio/services/app_storage_service.dart';
 
 class NumerosAleatoriosPage extends StatefulWidget {
   const NumerosAleatoriosPage({super.key});
@@ -10,27 +10,38 @@ class NumerosAleatoriosPage extends StatefulWidget {
 }
 
 class _NumerosAleatoriosPageState extends State<NumerosAleatoriosPage> {
-  late SharedPreferences storage;
+  final storage = AppStorageService();
+
   int? numeroGerado = 0;
   int? quantidadeDeNumerosGerados = 0;
-  final CHAVE_NUMERO_ALEATORIO = 'numeroGerado';
-  final CHAVE_QUANTIDADE_CLIQUES = 'quantidade_cliques';
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     carregarDados();
   }
 
   void carregarDados() async {
-    storage = await SharedPreferences.getInstance();
+    final numero = await storage.getValue(STORAGE_KEYS.CHAVE_NUMERO_ALEATORIO);
+    final total = await storage.getValue(STORAGE_KEYS.CHAVE_QUANTIDADE_CLIQUES);
+
     setState(() {
-      numeroGerado = storage.getInt(CHAVE_NUMERO_ALEATORIO);
-      print('Número gerado: $numeroGerado');
-      quantidadeDeNumerosGerados = storage.getInt(CHAVE_QUANTIDADE_CLIQUES);
-      print('Quantidade de números gerados: $quantidadeDeNumerosGerados');
+      numeroGerado = numero ?? 0;
+      quantidadeDeNumerosGerados = total ?? 0;
     });
+  }
+
+  void gerarNumeroAleatorio() async {
+    final random = Random();
+
+    setState(() {
+      numeroGerado = random.nextInt(100);
+      quantidadeDeNumerosGerados = (quantidadeDeNumerosGerados ?? 0) + 1;
+    });
+
+    await storage.setValue(STORAGE_KEYS.CHAVE_NUMERO_ALEATORIO, numeroGerado!);
+    await storage.setValue(
+        STORAGE_KEYS.CHAVE_QUANTIDADE_CLIQUES, quantidadeDeNumerosGerados!);
   }
 
   @override
@@ -43,39 +54,29 @@ class _NumerosAleatoriosPageState extends State<NumerosAleatoriosPage> {
           backgroundColor: Colors.amber,
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            var random = Random();
-            setState(() {
-              numeroGerado = random.nextInt(100);
-              quantidadeDeNumerosGerados =
-                  (quantidadeDeNumerosGerados ?? 0) + 1;
-            });
-            storage.setInt(CHAVE_NUMERO_ALEATORIO, numeroGerado!);
-            storage.setInt(
-                CHAVE_QUANTIDADE_CLIQUES, quantidadeDeNumerosGerados!);
-          },
+          onPressed: gerarNumeroAleatorio,
           child: const Icon(Icons.add),
           backgroundColor: Colors.amber,
         ),
-        body: Container(
-          child: Center(
-            child: Column(
-              children: [
-                Text(
-                  numeroGerado.toString() == 'null'
-                      ? 'Clique no botão para gerar um número aleatório'
-                      : 'Número gerado: $numeroGerado',
-                  style: const TextStyle(fontSize: 24),
-                ),
-                Text(
-                  quantidadeDeNumerosGerados == null
-                      ? 'Clique no botão para gerar um número aleatório'
-                      : 'Número de cliques: $quantidadeDeNumerosGerados',
-                  style: const TextStyle(fontSize: 24),
-                ),
-                const SizedBox(height: 20),
-              ],
-            ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                numeroGerado == null
+                    ? 'Clique no botão para gerar um número aleatório'
+                    : 'Número gerado: $numeroGerado',
+                style: const TextStyle(fontSize: 24),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                quantidadeDeNumerosGerados == null
+                    ? 'Clique no botão para gerar um número aleatório'
+                    : 'Número de cliques: $quantidadeDeNumerosGerados',
+                style: const TextStyle(fontSize: 24),
+              ),
+              const SizedBox(height: 20),
+            ],
           ),
         ),
       ),

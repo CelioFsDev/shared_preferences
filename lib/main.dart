@@ -6,8 +6,11 @@ import 'package:path_provider/path_provider.dart' as path_provider;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  var documentsDirectory =
+  final documentsDirectory =
       await path_provider.getApplicationDocumentsDirectory();
-  Hive.init(documentsDirectory.path);//Não funciona na web
-  runApp(TrilhaMyApp());
+
+  Hive.init(documentsDirectory.path);
+  Hive.registerAdapter(DadosCadastraisModelAdapter());
+
+  runApp(const TrilhaMyApp());
 }

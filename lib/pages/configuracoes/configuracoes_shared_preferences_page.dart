@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences_dio/services/app_storage_service.dart';
 
-class ConfiguracaoPage extends StatefulWidget {
-  const ConfiguracaoPage({super.key});
+class ConfiguracaoSharedPreferencesPage extends StatefulWidget {
+  const ConfiguracaoSharedPreferencesPage({super.key});
 
   @override
-  State<ConfiguracaoPage> createState() => _ConfiguracaoPageState();
+  State<ConfiguracaoSharedPreferencesPage> createState() =>
+      _ConfiguracaoSharedPreferencesPageState();
 }
 
-class _ConfiguracaoPageState extends State<ConfiguracaoPage> {
+class _ConfiguracaoSharedPreferencesPageState
+    extends State<ConfiguracaoSharedPreferencesPage> {
   final nomeController = TextEditingController();
   final emailController = TextEditingController();
   final alturaController = TextEditingController();
@@ -28,7 +30,8 @@ class _ConfiguracaoPageState extends State<ConfiguracaoPage> {
     nomeController.text =
         (await storage.getValue(STORAGE_KEYS.CHAVE_DADOSCADASTRAIS_NOME)) ?? '';
     emailController.text =
-        (await storage.getValue(STORAGE_KEYS.CHAVE_DADOSCADASTRAIS_EMAIL)) ?? '';
+        (await storage.getValue(STORAGE_KEYS.CHAVE_DADOSCADASTRAIS_EMAIL)) ??
+            '';
 
     final altura =
         await storage.getValue(STORAGE_KEYS.CHAVE_DADOSCADASTRAIS_ALTURA);

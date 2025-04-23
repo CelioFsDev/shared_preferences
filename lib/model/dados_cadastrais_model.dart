@@ -1,5 +1,6 @@
 import 'package:hive/hive.dart';
-
+//Utilize o comando abaixo para gerar o arquivo .g.dart //flutter pub run build_runner build
+part 'dados_cadastrais_model.g.dart';
 
 @HiveType(typeId: 1)
 class DadosCadastraisModel {

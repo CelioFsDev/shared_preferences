@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences_dio/pages/card_page.dart';
 import 'package:shared_preferences_dio/pages/list_view_horizontal.dart';
 import 'package:shared_preferences_dio/pages/list_view_vertical.dart';
-import 'package:shared_preferences_dio/pages/nova_tarefa_page.dart';
+import 'package:shared_preferences_dio/pages/tarefas/nova_tarefa_page.dart';
+import 'package:shared_preferences_dio/pages/tarefas/nova_tarefa_sqlite_page.dart';
 import 'package:shared_preferences_dio/shared/widgets/custom_drawer.dart';
 
 class TrilhaDrawerPage extends StatefulWidget {
@@ -39,26 +40,35 @@ class _TrilhaDrawerPageState extends State<TrilhaDrawerPage> {
                   CardPage(),
                   ListViewVerticalPage(),
                   ListViewHorizontalPage(),
-                  TarefaPage(),
+                  TarefaSqlitePage(),
                 ],
               ),
             ),
             BottomNavigationBar(
-                type: BottomNavigationBarType.fixed,
-                onTap: (value) {
-                  trilhaControllerPage.jumpToPage(value);
-                },
-                currentIndex: trilhaPosicaoPagina,
-                items: [
-                  BottomNavigationBarItem(
-                      label: 'CarView', icon: Icon(Icons.home)),
-                  BottomNavigationBarItem(
-                      label: 'ListView V', icon: Icon(Icons.addchart)),
-                  BottomNavigationBarItem(
-                      label: 'ListView H', icon: Icon(Icons.image)),
-                  BottomNavigationBarItem(
-                      icon: Icon(Icons.task), label: 'Tarefas'),
-                ])
+              type: BottomNavigationBarType.fixed,
+              onTap: (value) {
+                trilhaControllerPage.jumpToPage(value);
+              },
+              currentIndex: trilhaPosicaoPagina,
+              items: [
+                BottomNavigationBarItem(
+                  label: 'CarView',
+                  icon: Icon(Icons.home),
+                ),
+                BottomNavigationBarItem(
+                  label: 'ListView V',
+                  icon: Icon(Icons.addchart),
+                ),
+                BottomNavigationBarItem(
+                  label: 'ListView H',
+                  icon: Icon(Icons.image),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.task),
+                  label: 'Tarefas',
+                ),
+              ],
+            ),
           ],
         ),
       ),

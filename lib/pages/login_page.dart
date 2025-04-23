@@ -140,10 +140,10 @@ class _TrilhaLoginPageState extends State<TrilhaLoginPage> {
                     width: double.infinity,
                     child: ElevatedButton(
                       style: ButtonStyle(
-                        backgroundColor: MaterialStatePropertyAll(
+                        backgroundColor: WidgetStatePropertyAll(
                           Colors.purple,
                         ),
-                        shape: MaterialStatePropertyAll(
+                        shape: WidgetStatePropertyAll(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(
                               7.0,

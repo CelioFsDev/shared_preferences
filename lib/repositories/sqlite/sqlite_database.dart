@@ -6,7 +6,7 @@ Map<int, String> scripts = {
   1: '''CREATE TABLE TAREFAS (
    id INTEGER PRIMARY KEY AUTOINCREMENT,
    descricao TEXT NOT NULL,
-   concluida INTEGER NOT NULL DEFAULT 0,
+   concluida INTEGER NOT NULL DEFAULT 0
   ); ''',
 };
 

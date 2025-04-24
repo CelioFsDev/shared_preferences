@@ -1,5 +1,6 @@
 import 'package:shared_preferences_dio/model/tarefa_sqlite_model.dart';
 import 'sqlite_database.dart';
+
 class TarefaSqliteRepository {
   
   Future<List<TarefaSqliteModel>> obterDados() async{
@@ -9,9 +10,10 @@ class TarefaSqliteRepository {
     for (var element in result) {
       tarefas.add(TarefaSqliteModel(
         int.parse(element['id'].toString()),
-         element['descricao'].toString(),
-         bool.parse(element['concluida'].toString()),
-           ));}
+        element['descricao'].toString(),
+        element['concluida'] == 1, // Corrigido para converter 1/0 em booleano
+      ));
+    }
     return tarefas;
   }
 
@@ -23,9 +25,9 @@ class TarefaSqliteRepository {
     );
   }
 
-    Future<void> atualizar(TarefaSqliteModel tarefa) async {
+  Future<void> atualizar(TarefaSqliteModel tarefa) async {
     final db = await SQLiteDatabase().obterDatabase();
-    await db.rawInsert(
+    await db.rawUpdate(
       'UPDATE TAREFAS SET descricao = ?, concluida = ? WHERE id = ?',
       [
         tarefa.descricao,

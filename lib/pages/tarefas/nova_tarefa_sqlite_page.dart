@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences_dio/model/tarefa.dart';
 import 'package:shared_preferences_dio/model/tarefa_sqlite_model.dart';
 import 'package:shared_preferences_dio/repositories/sqlite/tarefa_sqlite_repository.dart';
-import 'package:shared_preferences_dio/repositories/tarefa_repository.dart';
 
 class TarefaSqlitePage extends StatefulWidget {
   const TarefaSqlitePage({super.key});
@@ -19,7 +17,6 @@ class _TarefaSqlitePageState extends State<TarefaSqlitePage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     obterTarefas();
   }
@@ -27,9 +24,11 @@ class _TarefaSqlitePageState extends State<TarefaSqlitePage> {
   void obterTarefas() async {
     if (apenasNaoConcluidos) {
       _tarefas = await tarefasRepository.obterDados();
+    } else {
+      _tarefas = await tarefasRepository.obterDados(); // Certifique-se de que todas as tarefas sejam carregadas
     }
 
-    setState(() {});
+    setState(() {}); // Garante que a interface seja atualizada
   }
 
   @override
@@ -57,9 +56,9 @@ class _TarefaSqlitePageState extends State<TarefaSqlitePage> {
                       await tarefasRepository.salvar(
                         TarefaSqliteModel(0, descricaoController.text, false),
                       );
-                      // ignore: use_build_context_synchronously
                       Navigator.pop(context);
-                      setState(() {});
+                      obterTarefas(); // Atualiza a lista de tarefas após salvar
+                    
                     },
                     child: Text('Salvar'),
                   ),

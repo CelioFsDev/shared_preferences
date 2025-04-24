@@ -1,5 +1,5 @@
 {
-    "editor.fontSize": 22, // Ajuste o valor para o tamanho desejado (em pixels)
+    "editor.fontSize": 18, // Ajuste o valor para o tamanho desejado (em pixels)
     "workbench.editor.fontSize": 18, // Tamanho da fonte para o editor
     "terminal.integrated.fontSize": 18, // Tamanho da fonte no terminal integrado
   }
